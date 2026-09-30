@@ -118,6 +118,7 @@
       <div class="flex items-center justify-between mb-2">
         <h2 class="font-bold text-lg">📊 Seu desempenho por assunto</h2>
         <div class="flex gap-2">
+          <button id="btn-reset" class="text-xs px-2 py-1 rounded border border-rose-300 text-rose-700">🗑️ Zerar progresso</button>
           <button id="btn-export" class="text-xs px-2 py-1 rounded border border-slate-300">⬇️ Exportar</button>
           <label class="text-xs px-2 py-1 rounded border border-slate-300 cursor-pointer">⬆️ Importar<input id="inp-import" type="file" accept="application/json" class="hidden"></label>
         </div>
@@ -210,7 +211,7 @@
       <li>O botão <b>Treinar só os pontos fracos</b> faz um simulado apenas com a fila inteira — ótimo na véspera da prova.</li>
     </ul>
     <h3 class="font-semibold mt-3">Progresso</h3>
-    <p>Tudo fica salvo neste navegador. Use <b>Exportar/Importar</b> para levar o progresso para outro aparelho.</p>
+    <p>Tudo fica salvo neste navegador. Use <b>Exportar/Importar</b> para levar o progresso para outro aparelho. O botão <b>🗑️ Zerar progresso</b> (em “Seu desempenho por assunto”) apaga o desempenho, a fila de revisão e o simulado em andamento deste simulado — os outros simulados não são afetados.</p>
   </div>
 </div>
 
@@ -837,6 +838,11 @@ const INST_ATLAS = [{"nome": "Cabo de bisturi", "tempo": "dierese", "funcao": "S
     } else if (revealed && e.key === 'Enter' && $('btn-next')) { e.preventDefault(); $('btn-next').click(); }
   });
 
+  $('btn-reset').onclick = () => {
+    if (!confirm('Zerar TODO o progresso deste simulado? Isso apaga o desempenho por assunto, a fila de revisão espaçada e o simulado em andamento. Não dá para desfazer (se quiser guardar, use Exportar antes).')) return;
+    [LS.srs, LS.stats, LS.session].forEach(k => { try { localStorage.removeItem(k); } catch (e) {} });
+    session = null; renderHome(); toast('Progresso zerado. Bons estudos! 🍀');
+  };
   $('btn-export').onclick = () => {
     const data = { app: 'simulado-praticas-cirurgicas', srs: srsLoad(), stats: statsLoad(), exportedAt: new Date().toISOString() };
     const a = document.createElement('a');
