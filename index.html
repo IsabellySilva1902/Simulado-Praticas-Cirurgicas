@@ -25,6 +25,7 @@
   select.num { min-width: 3.6rem; }
   .row-ok { background:#dcfce7 !important; border-color:#22c55e !important; }
   .row-bad { background:#fee2e2 !important; border-color:#ef4444 !important; }
+  .nav-btn { white-space: nowrap; font-size: .875rem; padding: .55rem .4rem; }
   .btn { display:inline-flex; align-items:center; justify-content:center; gap:.35rem; border-radius:.75rem; padding:.6rem 1rem; font-weight:600; }
 </style>
 </head>
@@ -60,6 +61,7 @@
     </div>
 
     <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
+      <div id="invite-banner" class="hidden mb-3 p-3 rounded-xl bg-violet-50 border border-violet-300 text-sm"></div>
       <h2 class="font-bold text-lg mb-1">Montar simulado</h2>
       <p class="text-sm text-slate-500 mb-4">Pense (ou fale em voz alta) a resposta como na prova prática, toque em <b>Mostrar resposta</b> e diga se acertou. Questões de ordem e de associação são corrigidas automaticamente.</p>
 
@@ -91,9 +93,18 @@
         </label>
       </div>
 
+      <div class="mb-4">
+        <div class="text-sm font-semibold mb-1">👥 Código de sessão <span class="font-normal text-slate-500">(opcional — para fazer igual com colegas)</span></div>
+        <div class="flex flex-col sm:flex-row gap-2">
+          <input id="inp-code" type="text" placeholder="ex: turma-b-instrumentais" autocomplete="off" class="flex-1 rounded-lg border border-slate-300 px-3 py-2 bg-white">
+          <button id="btn-invite" type="button" class="btn border border-slate-300 bg-white hover:bg-slate-100 text-sm whitespace-nowrap">🔗 Copiar link de convite</button>
+        </div>
+        <p class="text-xs text-slate-500 mt-1">Quem usar o mesmo código com as mesmas opções (o link de convite já leva tudo) recebe exatamente as mesmas questões, na mesma ordem e com as mesmas letras nas questões de ordem. Nesse modo as revisões pessoais não são misturadas.</p>
+      </div>
+
       <div class="flex flex-wrap gap-2">
         <button id="btn-start" class="btn bg-blue-600 text-white hover:bg-blue-700">🚀 Começar</button>
-        <button id="btn-weak" class="btn bg-rose-600 text-white hover:bg-rose-700">🔁 Treinar só os pontos fracos (<span id="weak-count">0</span>)</button>
+        <button id="btn-weak" class="btn bg-rose-600 text-white hover:bg-rose-700"><span>🔁 Treinar só os pontos fracos (<span id="weak-count">0</span>)</span></button>
         <button id="btn-atlas" class="btn border border-slate-300 bg-white hover:bg-slate-100">📚 Atlas de instrumentos</button>
       </div>
     </div>
@@ -127,6 +138,23 @@
     <div class="w-full h-2 bg-slate-200 rounded-full mb-4 overflow-hidden"><div id="q-bar" class="h-2 bg-blue-600" style="width:0%"></div></div>
 
     <div id="q-card" class="p-4 sm:p-5 rounded-2xl bg-white border border-slate-200 shadow-sm"></div>
+
+    <div class="mt-3 grid grid-cols-3 gap-2">
+      <button id="btn-prev" class="btn nav-btn border border-slate-300 bg-white hover:bg-slate-100 text-sm">← Anterior</button>
+      <button id="btn-finish" class="btn nav-btn border border-slate-300 bg-white hover:bg-slate-100 text-sm">🏁 Finalizar</button>
+      <button id="btn-skip" class="btn nav-btn border border-slate-300 bg-white hover:bg-slate-100 text-sm">Pular →</button>
+    </div>
+
+    <details id="q-map-wrap" class="mt-3 p-3 rounded-2xl bg-white border border-slate-200" open>
+      <summary class="cursor-pointer text-sm font-semibold">🗺️ Mapa de questões <span id="q-map-info" class="font-normal text-slate-500"></span></summary>
+      <div id="q-map" class="mt-2 flex flex-wrap gap-1.5"></div>
+      <div class="mt-2 text-xs text-slate-500 flex flex-wrap gap-3">
+        <span><span class="inline-block w-3 h-3 rounded bg-slate-200 align-middle"></span> sem resposta</span>
+        <span><span class="inline-block w-3 h-3 rounded bg-green-500 align-middle"></span> acertei</span>
+        <span><span class="inline-block w-3 h-3 rounded bg-amber-400 align-middle"></span> quase</span>
+        <span><span class="inline-block w-3 h-3 rounded bg-rose-500 align-middle"></span> errei</span>
+      </div>
+    </details>
   </section>
 
   <!-- ============ RESULT ============ -->
@@ -165,7 +193,11 @@
       <li><b>Ordem:</b> cada passo tem uma letra (A, B, C…); escolha o número da posição de cada um (A → 1, B → 3…) e toque em <b>Conferir</b>.</li>
       <li><b>Associação:</b> escolha para cada item a categoria certa (ex.: instrumento → tempo cirúrgico; instrumento → quadrante da mesa).</li>
     </ul>
-    <p class="mt-2">Toque em qualquer foto para ampliar. Atalhos no computador: <b>Espaço</b> mostra a resposta; <b>1</b>, <b>2</b>, <b>3</b> = errei, quase, acertei.</p>
+    <h3 class="font-semibold mt-3">Navegar entre as questões</h3>
+    <p>Use <b>← Anterior</b> e <b>Pular →</b>, ou toque em um número no <b>Mapa de questões</b> para ir direto a ela. Você pode voltar numa questão já respondida e mudar a sua avaliação. As puladas ficam cinza no mapa; ao responder a última, o simulado leva você para a primeira que ficou para trás. <b>🏁 Finalizar</b> encerra quando quiser (as puladas não contam na nota nem entram na revisão).</p>
+    <h3 class="font-semibold mt-3">👥 Fazer junto com colegas</h3>
+    <p>Digite um <b>código de sessão</b> (qualquer palavra, ex.: <i>turma-b-mesa</i>) e toque em <b>Copiar link de convite</b>. Mande o link no grupo: quem abrir recebe as mesmas opções e, ao começar, exatamente as mesmas questões, na mesma ordem e com as mesmas letras nas questões de ordem. No fim, <b>Copiar resultado</b> gera um texto com a nota para comparar no grupo.</p>
+    <p class="mt-2">Toque em qualquer foto para ampliar. Atalhos no computador: <b>Espaço</b> mostra a resposta; <b>1</b>, <b>2</b>, <b>3</b> = errei, quase, acertei; <b>←</b> / <b>→</b> = anterior / pular.</p>
     <h3 class="font-semibold mt-3">Cronômetro por estação</h3>
     <p>Escolha um tempo por questão para simular a prova prática. Quando o tempo acaba, a resposta aparece sozinha e você se avalia.</p>
     <h3 class="font-semibold mt-3">Montagem da mesa</h3>
@@ -197,10 +229,10 @@ const INST_ATLAS = [{"nome": "Cabo de bisturi", "tempo": "dierese", "funcao": "S
     { key: 'cur', label: 'Feridas e curativos', icon: '🩹' },
   ];
   const INST_SUBS = [
-    { key: 'Identificação', label: 'Identificar (nome)' },
-    { key: 'Tempo cirúrgico', label: 'Tempo cirúrgico' },
-    { key: 'Função', label: 'Função' },
-    { key: 'outros', label: 'Diferenciação, exemplos e associação' },
+    { key: 'Identificação', label: 'Identificar (nome)', q: 'nome' },
+    { key: 'Tempo cirúrgico', label: 'Tempo cirúrgico', q: 'tempo' },
+    { key: 'Função', label: 'Função', q: 'funcao' },
+    { key: 'outros', label: 'Diferenciação, exemplos e associação', q: 'outros' },
   ];
   const LS = { srs: 'simpc_srs', stats: 'simpc_stats', session: 'simpc_session', prefs: 'simpc_prefs' };
   const SRS_INTERVALS = [1, 2, 4, 8];
@@ -214,17 +246,39 @@ const INST_ATLAS = [{"nome": "Cabo de bisturi", "tempo": "dierese", "funcao": "S
   function srsLoad() { const s = load(LS.srs, null); return (s && s.items) ? s : { counter: 0, items: {} }; }
   function statsLoad() { return load(LS.stats, { cards: {} }); }
 
+  // ---------- PRNG determinístico (código de sessão) ----------
+  function xmur3(str) {
+    let h = 1779033703 ^ str.length;
+    for (let i = 0; i < str.length; i++) { h = Math.imul(h ^ str.charCodeAt(i), 3432918353); h = (h << 13) | (h >>> 19); }
+    return function () { h = Math.imul(h ^ (h >>> 16), 2246822507); h = Math.imul(h ^ (h >>> 13), 3266489909); return (h ^= h >>> 16) >>> 0; };
+  }
+  function mulberry32(a) {
+    return function () { a |= 0; a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  }
+  function makeRng(seed) { return seed ? mulberry32(xmur3(seed)()) : Math.random; }
+  function normCode(c) { return String(c || '').trim().toLowerCase(); }
+
   // ---------- utils ----------
   const $ = id => document.getElementById(id);
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch])); }
-  function shuffle(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
-  function toast(msg) { const d = document.createElement('div'); d.className = 'toast px-4 py-2 rounded-xl bg-slate-800 text-white text-sm shadow'; d.textContent = msg; $('toast-container').appendChild(d); setTimeout(() => d.remove(), 2800); }
+  function shuffle(a, rng) { rng = rng || Math.random; a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+  function toast(msg) { const d = document.createElement('div'); d.className = 'toast px-4 py-2 rounded-xl bg-slate-800 text-white text-sm shadow max-w-xs'; d.textContent = msg; $('toast-container').appendChild(d); setTimeout(() => d.remove(), 3200); }
   function show(screen) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); $('screen-' + screen).classList.add('active'); window.scrollTo(0, 0); }
   const LETTERS = 'ABCDEFGHIJ';
   function topicOf(key) { return TOPICS.find(t => t.key === key) || { label: key, icon: '' }; }
+  function copyText(txt, okMsg) {
+    const fallback = () => { window.prompt('Copie o texto abaixo:', txt); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      let settled = false;
+      const t = setTimeout(() => { if (!settled) { settled = true; fallback(); } }, 2000);
+      navigator.clipboard.writeText(txt).then(() => { if (!settled) { settled = true; clearTimeout(t); toast(okMsg); } },
+        () => { if (!settled) { settled = true; clearTimeout(t); fallback(); } });
+    } else fallback();
+  }
 
   // ---------- prefs / home ----------
-  let prefs = load(LS.prefs, { topics: TOPICS.map(t => t.key), instSubs: INST_SUBS.map(s => s.key), count: '20', timer: '0', type: false });
+  let prefs = load(LS.prefs, null) || {};
+  prefs = Object.assign({ topics: TOPICS.map(t => t.key), instSubs: INST_SUBS.map(s => s.key), count: '20', timer: '0', type: false, code: '' }, prefs);
 
   function instSubKey(c) { return ['Identificação', 'Tempo cirúrgico', 'Função'].includes(c.sub) ? c.sub : 'outros'; }
   function eligible(topics, instSubs) {
@@ -248,6 +302,7 @@ const INST_ATLAS = [{"nome": "Cabo de bisturi", "tempo": "dierese", "funcao": "S
       sl.appendChild(lab);
     });
     $('sel-count').value = prefs.count; $('sel-timer').value = prefs.timer; $('chk-type').checked = !!prefs.type;
+    $('inp-code').value = prefs.code || '';
 
     const srs = srsLoad();
     const ids = Object.keys(srs.items).filter(id => BY_ID[id]);
@@ -281,9 +336,10 @@ const INST_ATLAS = [{"nome": "Cabo de bisturi", "tempo": "dierese", "funcao": "S
     $('stats-box').innerHTML = rows;
 
     const sess = load(LS.session, null);
-    if (sess && sess.ids && sess.idx < sess.ids.length) {
+    if (sess && sess.ids && sess.ids.length && !sess.done) {
+      const nAns = Object.keys(sess.results || {}).length;
       $('resume-box').classList.remove('hidden');
-      $('resume-info').textContent = `Questão ${sess.idx + 1} de ${sess.ids.length}.`;
+      $('resume-info').textContent = `${nAns} de ${sess.ids.length} respondidas${sess.code ? ' · código “' + sess.code + '”' : ''}.`;
     } else $('resume-box').classList.add('hidden');
   }
 
@@ -297,52 +353,99 @@ const INST_ATLAS = [{"nome": "Cabo de bisturi", "tempo": "dierese", "funcao": "S
     prefs.topics = [...document.querySelectorAll('.topic-chk:checked')].map(i => i.value);
     prefs.instSubs = [...document.querySelectorAll('.inst-sub-chk:checked')].map(i => i.value);
     prefs.count = $('sel-count').value; prefs.timer = $('sel-timer').value; prefs.type = $('chk-type').checked;
+    prefs.code = $('inp-code').value.trim();
     save(LS.prefs, prefs);
   }
 
-  // ---------- build session ----------
-  function balancedPick(pool, n) {
+  // ---------- convite (link com código + opções) ----------
+  function inviteUrl() {
+    readPrefs();
+    const url = new URL(location.href);
+    url.search = ''; url.hash = '';
+    if (prefs.code) url.searchParams.set('codigo', prefs.code);
+    url.searchParams.set('assuntos', prefs.topics.join(','));
+    url.searchParams.set('tipos', INST_SUBS.filter(s => prefs.instSubs.includes(s.key)).map(s => s.q).join(','));
+    url.searchParams.set('qtd', prefs.count);
+    url.searchParams.set('tempo', prefs.timer);
+    return url.toString();
+  }
+  function applyQueryParams() {
+    const q = new URLSearchParams(location.search);
+    if (![...q.keys()].length) return;
+    const codigo = q.get('codigo'), assuntos = q.get('assuntos'), tipos = q.get('tipos'), qtd = q.get('qtd'), tempo = q.get('tempo');
+    if (codigo !== null) prefs.code = codigo;
+    if (assuntos) { const t = assuntos.split(',').filter(k => TOPICS.some(x => x.key === k)); if (t.length) prefs.topics = t; }
+    if (tipos) { const t = INST_SUBS.filter(s => tipos.split(',').includes(s.q)).map(s => s.key); if (t.length) prefs.instSubs = t; }
+    if (qtd && [...$('sel-count').options].some(o => o.value === qtd)) prefs.count = qtd;
+    if (tempo && [...$('sel-timer').options].some(o => o.value === tempo)) prefs.timer = tempo;
+    save(LS.prefs, prefs);
+    if (codigo) {
+      $('invite-banner').innerHTML = `👥 Você recebeu um convite com o código <b>“${esc(codigo)}”</b>. As opções já foram ajustadas — é só tocar em <b>🚀 Começar</b> para fazer as mesmas questões dos seus colegas.`;
+      $('invite-banner').classList.remove('hidden');
+    }
+    history.replaceState(null, '', location.pathname);
+  }
+
+  // ---------- montar sessão ----------
+  function balancedPick(pool, n, rng) {
     const by = {};
     pool.forEach(c => { (by[c.topic] = by[c.topic] || []).push(c); });
-    Object.keys(by).forEach(k => { by[k] = shuffle(by[k]); });
-    const keys = shuffle(Object.keys(by));
+    const keys = Object.keys(by).sort();
+    keys.forEach(k => { by[k] = shuffle(by[k], rng); });
+    const order = shuffle(keys, rng);
     const out = [];
     let i = 0;
-    while (out.length < n && keys.some(k => by[k].length)) {
-      const k = keys[i % keys.length]; i++;
+    while (out.length < n && order.some(k => by[k].length)) {
+      const k = order[i % order.length]; i++;
       if (by[k].length) out.push(by[k].pop());
     }
     return out;
   }
 
   function startSession(opts) {
+    opts = opts || {};
     readPrefs();
     const srs = srsLoad();
-    srs.counter += 1; save(LS.srs, srs);
-    let cards;
-    if (opts && opts.ids) {
+    const code = opts.ids ? '' : normCode(prefs.code);
+    let cards, revIds = new Set();
+    if (opts.ids) {
       cards = shuffle(opts.ids.map(id => BY_ID[id]).filter(Boolean));
     } else {
-      if (!prefs.topics.length) { toast('Escolha pelo menos um assunto.'); srs.counter -= 1; save(LS.srs, srs); return; }
-      if (prefs.topics.includes('inst') && !prefs.instSubs.length) { toast('Escolha pelo menos um tipo de pergunta de instrumentais.'); srs.counter -= 1; save(LS.srs, srs); return; }
-      const pool = eligible(prefs.topics, prefs.instSubs);
+      if (!prefs.topics.length) { toast('Escolha pelo menos um assunto.'); return; }
+      if (prefs.topics.includes('inst') && !prefs.instSubs.length) { toast('Escolha pelo menos um tipo de pergunta de instrumentais.'); return; }
+      const pool = eligible(prefs.topics, prefs.instSubs).slice().sort((a, b) => a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
       const n = prefs.count === 'all' ? pool.length : Math.min(parseInt(prefs.count, 10), pool.length);
-      const due = shuffle(pool.filter(c => srs.items[c.id] && srs.items[c.id].due <= srs.counter));
-      const nRev = prefs.count === 'all' ? 0 : Math.min(due.length, Math.floor(n * SRS_MAX_SHARE));
-      const rev = due.slice(0, nRev);
-      const revIds = new Set(rev.map(c => c.id));
-      const rest = balancedPick(pool.filter(c => !revIds.has(c.id)), n - rev.length);
-      cards = shuffle(rev.concat(rest));
-      cards.forEach(c => { if (revIds.has(c.id)) c._rev = true; });
+      if (code) {
+        const rng = makeRng('praticas-cirurgicas|' + code);
+        cards = shuffle(balancedPick(pool, n, rng), rng);
+      } else {
+        const due = shuffle(pool.filter(c => srs.items[c.id] && srs.items[c.id].due <= srs.counter + 1));
+        const nRev = prefs.count === 'all' ? 0 : Math.min(due.length, Math.floor(n * SRS_MAX_SHARE));
+        const rev = due.slice(0, nRev);
+        rev.forEach(c => revIds.add(c.id));
+        const rest = balancedPick(pool.filter(c => !revIds.has(c.id)), n - rev.length);
+        cards = shuffle(rev.concat(rest));
+      }
     }
-    const sess = {
-      ids: cards.map(c => c.id), rev: cards.filter(c => c._rev || (srs.items[c.id])).map(c => c.id),
-      idx: 0, results: {}, timer: parseInt(prefs.timer, 10) || 0, type: !!prefs.type, weak: !!(opts && opts.weak),
-      startedAt: Date.now(), orders: {},
+    // ordem dos itens das questões de ordem/associação (igual para todos com o mesmo código)
+    const orders = {};
+    cards.forEach(c => {
+      if (c.type === 'open') return;
+      const rng = makeRng(code ? 'praticas-cirurgicas|' + code + '|' + c.id : '');
+      const len = c.type === 'order' ? c.items.length : c.pairs.length;
+      let perm = shuffle([...Array(len).keys()], rng);
+      if (c.type === 'order' && len > 1 && perm.every((v, i) => v === i)) perm = perm.slice(1).concat(perm[0]);
+      orders[c.id] = perm;
+    });
+    session = {
+      ids: cards.map(c => c.id),
+      rev: code ? [] : cards.filter(c => revIds.has(c.id) || srs.items[c.id]).map(c => c.id),
+      idx: 0, results: {}, answers: {}, typed: {}, orders,
+      timer: parseInt(prefs.timer, 10) || 0, type: !!prefs.type, weak: !!opts.weak, code,
+      startedAt: Date.now(), done: false,
     };
-    cards.forEach(c => { delete c._rev; });
-    save(LS.session, sess);
-    session = sess;
+    save(LS.session, session);
+    $('q-map-wrap').open = session.ids.length <= 50;
     show('quiz'); renderCard();
   }
 
@@ -351,42 +454,61 @@ const INST_ATLAS = [{"nome": "Cabo de bisturi", "tempo": "dierese", "funcao": "S
   let timerHandle = null, timeLeft = 0;
   let revealed = false;
 
-  function stopTimer() { if (timerHandle) { clearInterval(timerHandle); timerHandle = null; } }
+  function stopTimer() { if (timerHandle) { clearInterval(timerHandle); timerHandle = null; } $('q-timer').classList.add('hidden'); }
   function startTimer(onEnd) {
     stopTimer();
-    if (!session.timer) { $('q-timer').classList.add('hidden'); return; }
+    if (!session.timer) return;
     timeLeft = session.timer; $('q-timer').classList.remove('hidden');
     const paint = () => { const m = Math.floor(timeLeft / 60), s = timeLeft % 60; $('q-timer').textContent = `⏱️ ${m}:${String(s).padStart(2, '0')}`; $('q-timer').style.background = timeLeft <= 10 ? '#dc2626' : '#1e293b'; };
     paint();
-    timerHandle = setInterval(() => { timeLeft--; paint(); if (timeLeft <= 0) { stopTimer(); onEnd(); } }, 1000);
+    timerHandle = setInterval(() => { timeLeft--; paint(); if (timeLeft <= 0) { clearInterval(timerHandle); timerHandle = null; onEnd(); } }, 1000);
   }
 
   function imgTag(src, cls) { return `<img src="${esc(src)}" alt="Imagem da questão" class="${cls}" data-zoom="1" loading="lazy">`; }
+  function curCard() { return BY_ID[session.ids[session.idx]]; }
+  function nAnswered() { return session.ids.filter(id => id in session.results).length; }
+
+  function renderMap() {
+    const cls = { 2: 'bg-green-500 text-white border-green-600', 1: 'bg-amber-400 text-white border-amber-500', 0: 'bg-rose-500 text-white border-rose-600' };
+    $('q-map').innerHTML = session.ids.map((id, i) => {
+      const r = session.results[id];
+      const c = r === undefined ? 'bg-slate-100 text-slate-600 border-slate-300' : cls[r];
+      const cur = i === session.idx ? ' ring-2 ring-blue-600 ring-offset-1' : '';
+      return `<button class="map-btn w-8 h-8 rounded-lg border text-xs font-semibold ${c}${cur}" data-i="${i}" title="Questão ${i + 1}">${i + 1}</button>`;
+    }).join('');
+    const nA = nAnswered();
+    $('q-map-info').textContent = `(${nA} de ${session.ids.length} respondidas)`;
+  }
+
+  function goTo(i) {
+    if (!session) return;
+    if (i < 0 || i >= session.ids.length) return;
+    // guarda o que foi digitado antes de sair
+    const c = curCard();
+    if ($('q-typed') && c && !(c.id in session.results)) session.typed[c.id] = $('q-typed').value;
+    session.idx = i; save(LS.session, session); renderCard();
+  }
 
   function renderCard() {
     stopTimer(); revealed = false;
-    const c = BY_ID[session.ids[session.idx]];
+    const c = curCard();
     if (!c) { finishSession(); return; }
     const n = session.ids.length;
+    const answered = c.id in session.results;
     $('q-progress').textContent = `Questão ${session.idx + 1} de ${n}`;
-    $('q-bar').style.width = (100 * session.idx / n) + '%';
+    $('q-bar').style.width = (100 * nAnswered() / n) + '%';
     const t = topicOf(c.topic);
     const isRev = session.rev.includes(c.id);
-    $('q-badges').innerHTML = `· <span class="text-slate-500">${t.icon} ${esc(t.label)}${c.sub ? ' — ' + esc(c.sub) : ''}</span>${isRev ? ' · <span class="text-rose-600 font-semibold">🔁 revisão</span>' : ''}`;
+    $('q-badges').innerHTML = `· <span class="text-slate-500">${t.icon} ${esc(t.label)}${c.sub ? ' — ' + esc(c.sub) : ''}</span>${isRev ? ' · <span class="text-rose-600 font-semibold">🔁 revisão</span>' : ''}${session.code ? ` · <span class="text-violet-700">👥 ${esc(session.code)}</span>` : ''}`;
     let h = '';
     if (c.img) h += `<div class="mb-4 p-2 rounded-xl bg-slate-50 border border-slate-100">${imgTag(c.img, 'card-img')}</div>`;
     h += `<div class="text-base sm:text-lg font-semibold pre-line mb-3">${esc(c.prompt)}</div>`;
     if (c.type === 'open') {
-      if (session.type) h += `<textarea id="q-typed" rows="2" class="w-full rounded-lg border border-slate-300 p-2 text-sm mb-3" placeholder="Digite sua resposta (opcional)…"></textarea>`;
+      if (session.type) h += `<textarea id="q-typed" rows="2" class="w-full rounded-lg border border-slate-300 p-2 text-sm mb-3" placeholder="Digite sua resposta (opcional)…">${esc(session.typed[c.id] || '')}</textarea>`;
       h += `<button id="btn-reveal" class="btn w-full bg-blue-600 text-white hover:bg-blue-700">👁️ Mostrar resposta</button>`;
       h += `<div id="q-answer" class="hidden"></div>`;
     } else if (c.type === 'order') {
-      let perm = session.orders[c.id];
-      if (!perm) {
-        perm = shuffle(c.items.map((_, i) => i));
-        if (perm.every((v, i) => v === i) && perm.length > 1) perm = perm.slice(1).concat(perm[0]);
-        session.orders[c.id] = perm; save(LS.session, session);
-      }
+      const perm = session.orders[c.id];
       h += `<p class="text-sm text-slate-500 mb-2">Escolha a posição (1 = primeiro) de cada passo:</p><div id="order-rows" class="space-y-2">`;
       perm.forEach((itemIdx, pos) => {
         h += `<div class="order-row flex items-center gap-2 p-2 rounded-lg border border-slate-200 bg-white" data-item="${itemIdx}">
@@ -397,8 +519,7 @@ const INST_ATLAS = [{"nome": "Cabo de bisturi", "tempo": "dierese", "funcao": "S
       });
       h += `</div><button id="btn-check" class="btn w-full mt-3 bg-blue-600 text-white hover:bg-blue-700">✔️ Conferir</button><div id="q-answer" class="hidden"></div>`;
     } else if (c.type === 'match') {
-      let perm = session.orders[c.id];
-      if (!perm) { perm = shuffle(c.pairs.map((_, i) => i)); session.orders[c.id] = perm; save(LS.session, session); }
+      const perm = session.orders[c.id];
       h += `<div id="match-rows" class="space-y-2">`;
       perm.forEach((pi, pos) => {
         h += `<div class="match-row flex flex-wrap items-center gap-2 p-2 rounded-lg border border-slate-200 bg-white" data-pair="${pi}">
@@ -411,8 +532,23 @@ const INST_ATLAS = [{"nome": "Cabo de bisturi", "tempo": "dierese", "funcao": "S
     }
     $('q-card').innerHTML = h;
     $('q-card').classList.remove('fade-in'); void $('q-card').offsetWidth; $('q-card').classList.add('fade-in');
-    if (c.type === 'open') { $('btn-reveal').onclick = revealOpen; startTimer(revealOpen); }
-    else { $('btn-check').onclick = () => checkStructured(false); startTimer(() => checkStructured(true)); }
+    $('btn-prev').disabled = session.idx === 0;
+    $('btn-prev').style.opacity = session.idx === 0 ? '.4' : '';
+    $('btn-skip').textContent = answered ? 'Próxima →' : 'Pular →';
+    $('btn-skip').disabled = session.idx === n - 1 && answered && nAnswered() === n;
+    renderMap();
+
+    if (c.type === 'open') {
+      $('btn-reveal').onclick = revealOpen;
+      if (answered) revealOpen(); else startTimer(revealOpen);
+    } else {
+      $('btn-check').onclick = () => checkStructured(false);
+      if (answered) {
+        const vals = session.answers[c.id] || [];
+        document.querySelectorAll(c.type === 'order' ? '.order-row' : '.match-row').forEach((r, i) => { r.querySelector('select').value = vals[i] || ''; });
+        showStructured(c, vals, false, false);
+      } else startTimer(() => checkStructured(true));
+    }
   }
 
   function answerExtras(c) {
@@ -424,27 +560,30 @@ const INST_ATLAS = [{"nome": "Cabo de bisturi", "tempo": "dierese", "funcao": "S
 
   function revealOpen() {
     if (revealed) return; revealed = true; stopTimer();
-    const c = BY_ID[session.ids[session.idx]];
-    const typed = $('q-typed') ? $('q-typed').value.trim() : '';
+    const c = curCard();
+    if ($('q-typed')) { session.typed[c.id] = $('q-typed').value; }
+    const typed = (session.typed[c.id] || '').trim();
+    const prev = session.results[c.id];
     let h = `<div class="mt-3 p-4 rounded-xl bg-emerald-50 border border-emerald-200">`;
     if (typed) h += `<div class="text-xs text-slate-500 mb-1">Sua resposta: <span class="text-slate-700">${esc(typed)}</span></div>`;
     h += `<div class="text-xs font-semibold text-emerald-700 uppercase tracking-wide">Resposta</div><div class="text-base font-bold pre-line">${esc(c.answer)}</div>`;
     h += answerExtras(c) + `</div>`;
-    h += `<div class="mt-3 text-sm text-slate-600 text-center">Como você foi?</div>
+    h += `<div class="mt-3 text-sm text-slate-600 text-center">${prev === undefined ? 'Como você foi?' : 'Sua avaliação (toque para mudar):'}</div>
       <div class="grid grid-cols-3 gap-2 mt-2">
-        <button class="btn grade-btn text-sm sm:text-base px-2 bg-rose-600 text-white hover:bg-rose-700" data-g="0">❌ Errei</button>
-        <button class="btn grade-btn text-sm sm:text-base px-2 bg-amber-500 text-white hover:bg-amber-600" data-g="1">🤏 Quase</button>
-        <button class="btn grade-btn text-sm sm:text-base px-2 bg-green-600 text-white hover:bg-green-700" data-g="2">✅ Acertei</button>
+        <button class="btn grade-btn text-sm sm:text-base px-2 bg-rose-600 text-white hover:bg-rose-700${prev === 0 ? ' ring-4 ring-rose-300' : ''}" data-g="0">❌ Errei</button>
+        <button class="btn grade-btn text-sm sm:text-base px-2 bg-amber-500 text-white hover:bg-amber-600${prev === 1 ? ' ring-4 ring-amber-300' : ''}" data-g="1">🤏 Quase</button>
+        <button class="btn grade-btn text-sm sm:text-base px-2 bg-green-600 text-white hover:bg-green-700${prev === 2 ? ' ring-4 ring-green-300' : ''}" data-g="2">✅ Acertei</button>
       </div>`;
     $('btn-reveal').classList.add('hidden');
+    if ($('q-typed')) $('q-typed').disabled = true;
     const box = $('q-answer'); box.innerHTML = h; box.classList.remove('hidden');
     box.querySelectorAll('.grade-btn').forEach(b => { b.onclick = () => grade(parseInt(b.dataset.g, 10)); });
-    box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    if (prev === undefined) box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 
   function checkStructured(timeout) {
     if (revealed) return;
-    const c = BY_ID[session.ids[session.idx]];
+    const c = curCard();
     const rows = [...document.querySelectorAll(c.type === 'order' ? '.order-row' : '.match-row')];
     const vals = rows.map(r => r.querySelector('select').value);
     if (!timeout && vals.some(v => v === '')) { toast('Preencha todos os itens antes de conferir.'); return; }
@@ -452,11 +591,16 @@ const INST_ATLAS = [{"nome": "Cabo de bisturi", "tempo": "dierese", "funcao": "S
       const nonEmpty = vals.filter(v => v !== '');
       if (new Set(nonEmpty).size !== nonEmpty.length) { toast('Há números repetidos — cada posição só pode ser usada uma vez.'); return; }
     }
+    showStructured(c, vals, timeout, true);
+  }
+
+  function showStructured(c, vals, timeout, record) {
     revealed = true; stopTimer();
+    const rows = [...document.querySelectorAll(c.type === 'order' ? '.order-row' : '.match-row')];
     let ok = 0;
     rows.forEach((r, i) => {
       let right;
-      if (c.type === 'order') right = vals[i] !== '' && parseInt(vals[i], 10) === parseInt(r.dataset.item, 10);
+      if (c.type === 'order') right = vals[i] !== '' && vals[i] !== undefined && parseInt(vals[i], 10) === parseInt(r.dataset.item, 10);
       else right = vals[i] === c.pairs[parseInt(r.dataset.pair, 10)][1];
       if (right) ok++;
       r.classList.add(right ? 'row-ok' : 'row-bad');
@@ -475,46 +619,85 @@ const INST_ATLAS = [{"nome": "Cabo de bisturi", "tempo": "dierese", "funcao": "S
       h += `<div class="text-xs text-slate-500 mt-1">Gabarito em letras: ${c.items.map((_, i) => LETTERS[perm.indexOf(i)] + ' = ' + (i + 1)).join(' · ')}</div>`;
     }
     h += answerExtras(c) + `</div>`;
-    h += `<button id="btn-next" class="btn w-full mt-3 bg-blue-600 text-white hover:bg-blue-700">Próxima →</button>`;
+    if (record) h += `<button id="btn-next" class="btn w-full mt-3 bg-blue-600 text-white hover:bg-blue-700">Próxima →</button>`;
     $('btn-check').classList.add('hidden');
     const box = $('q-answer'); box.innerHTML = h; box.classList.remove('hidden');
-    $('btn-next').onclick = () => grade(g);
-    box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    if (record) {
+      session.answers[c.id] = vals;
+      session.results[c.id] = g; save(LS.session, session); renderMap();
+      $('q-bar').style.width = (100 * nAnswered() / session.ids.length) + '%';
+      $('btn-skip').textContent = 'Próxima →';
+      $('btn-next').onclick = advance;
+      box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
   }
 
   function grade(g) {
-    const c = BY_ID[session.ids[session.idx]];
+    const c = curCard();
     session.results[c.id] = g;
-    // estatísticas
-    const st = statsLoad();
-    const s = st.cards[c.id] || { n: 0, pts: 0, last: null };
-    s.n += 1; s.pts += g / 2; s.last = g; st.cards[c.id] = s; save(LS.stats, st);
-    // revisão espaçada
-    const srs = srsLoad();
-    const it = srs.items[c.id];
-    if (g < 2) srs.items[c.id] = { box: 0, due: srs.counter + 1, lapses: ((it && it.lapses) || 0) + 1 };
-    else if (it) {
-      const nb = it.box + 1;
-      if (nb >= SRS_INTERVALS.length) delete srs.items[c.id];
-      else srs.items[c.id] = { box: nb, due: srs.counter + SRS_INTERVALS[nb], lapses: it.lapses || 0 };
+    save(LS.session, session);
+    advance();
+  }
+
+  // próxima questão: segue em frente; no fim, volta para a primeira sem resposta
+  function advance() {
+    const n = session.ids.length;
+    for (let k = 1; k <= n; k++) {
+      const j = (session.idx + k) % n;
+      if (!(session.ids[j] in session.results)) {
+        if (j < session.idx) toast('Voltando para as questões que ficaram sem resposta.');
+        goTo(j); return;
+      }
     }
-    save(LS.srs, srs);
-    session.idx += 1; save(LS.session, session);
-    if (session.idx >= session.ids.length) finishSession(); else renderCard();
+    finishSession();
+  }
+
+  // estatísticas e revisão espaçada são registradas ao finalizar (dá para mudar a avaliação antes)
+  function commitResults(s) {
+    const st = statsLoad();
+    const srs = srsLoad();
+    srs.counter += 1;
+    s.ids.forEach(id => {
+      if (!(id in s.results)) return;
+      const g = s.results[id];
+      const cs = st.cards[id] || { n: 0, pts: 0, last: null };
+      cs.n += 1; cs.pts += g / 2; cs.last = g; st.cards[id] = cs;
+      const it = srs.items[id];
+      if (g < 2) srs.items[id] = { box: 0, due: srs.counter + 1, lapses: ((it && it.lapses) || 0) + 1 };
+      else if (it) {
+        const nb = it.box + 1;
+        if (nb >= SRS_INTERVALS.length) delete srs.items[id];
+        else srs.items[id] = { box: nb, due: srs.counter + SRS_INTERVALS[nb], lapses: it.lapses || 0 };
+      }
+    });
+    save(LS.stats, st); save(LS.srs, srs);
+  }
+
+  function requestFinish() {
+    const left = session.ids.length - nAnswered();
+    if (left > 0 && !confirm(`Ainda há ${left} questão(ões) sem resposta. Finalizar assim mesmo? (as puladas não contam na nota)`)) return;
+    finishSession();
   }
 
   function finishSession() {
     stopTimer();
-    const s = session; save(LS.session, null);
+    const s = session;
+    if (!s) return;
+    commitResults(s);
+    s.done = true; save(LS.session, null);
     const ids = s.ids.filter(id => id in s.results);
+    const skipped = s.ids.length - ids.length;
     const pts = ids.reduce((a, id) => a + s.results[id] / 2, 0);
     const pct = ids.length ? Math.round(100 * pts / ids.length) : 0;
     const nOk = ids.filter(id => s.results[id] === 2).length, nPart = ids.filter(id => s.results[id] === 1).length, nBad = ids.filter(id => s.results[id] === 0).length;
     const missed = ids.filter(id => s.results[id] < 2);
+    const skippedIds = s.ids.filter(id => !(id in s.results));
     let byT = '';
+    const topicLines = [];
     TOPICS.forEach(t => {
       const ti = ids.filter(id => BY_ID[id].topic === t.key); if (!ti.length) return;
       const p = Math.round(100 * ti.reduce((a, id) => a + s.results[id] / 2, 0) / ti.length);
+      topicLines.push(`${t.icon} ${t.label}: ${p}%`);
       byT += `<div class="flex justify-between py-1 border-b border-slate-100"><span>${t.icon} ${esc(t.label)}</span><span class="font-semibold">${p}% <span class="text-xs text-slate-400">(${ti.length})</span></span></div>`;
     });
     let list = '';
@@ -525,20 +708,28 @@ const INST_ATLAS = [{"nome": "Cabo de bisturi", "tempo": "dierese", "funcao": "S
         ${c.img ? `<img src="${esc(c.img)}" data-zoom="1" class="w-20 h-20 object-contain bg-white rounded-lg shrink-0 cursor-zoom-in" alt="">` : ''}
         <div class="text-sm"><div class="font-semibold">${esc(c.prompt)}</div><div class="pre-line mt-1">${esc(ans)}</div></div></div>`;
     });
+    const shareTxt = `✂️ Teórico-Prático de Práticas Cirúrgicas${s.code ? ` — código “${s.code}”` : ''}\n`
+      + `Nota: ${pct}% (✅ ${nOk} · 🤏 ${nPart} · ❌ ${nBad}${skipped ? ` · ⏭️ ${skipped} puladas` : ''}) em ${s.ids.length} questões\n`
+      + topicLines.join('\n');
     $('result-box').innerHTML = `
       <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm text-center">
+        ${s.code ? `<div class="text-sm text-violet-700 mb-1">👥 Código de sessão: <b>${esc(s.code)}</b></div>` : ''}
         <div class="text-5xl font-extrabold ${pct >= 70 ? 'text-green-600' : pct >= 50 ? 'text-amber-500' : 'text-rose-600'}">${pct}%</div>
-        <div class="text-sm text-slate-500 mt-1">✅ ${nOk} acertos · 🤏 ${nPart} quase · ❌ ${nBad} erros (quase vale meio ponto)</div>
+        <div class="text-sm text-slate-500 mt-1">✅ ${nOk} acertos · 🤏 ${nPart} quase · ❌ ${nBad} erros${skipped ? ` · ⏭️ ${skipped} puladas` : ''} (quase vale meio ponto)</div>
         <div class="flex flex-wrap justify-center gap-2 mt-4">
           ${missed.length ? '<button id="btn-redo" class="btn bg-rose-600 text-white">🔁 Refazer os que errei agora (' + missed.length + ')</button>' : ''}
+          ${skipped ? '<button id="btn-redo-skip" class="btn bg-slate-700 text-white">⏭️ Fazer as puladas (' + skipped + ')</button>' : ''}
+          <button id="btn-share" class="btn bg-violet-600 text-white">📋 Copiar resultado</button>
           <button id="btn-new" class="btn bg-blue-600 text-white">🚀 Novo simulado</button>
           <button id="btn-res-home" class="btn border border-slate-300 bg-white">🏠 Início</button>
         </div>
       </div>
-      <div class="mt-4 p-5 rounded-2xl bg-white border border-slate-200 shadow-sm"><h3 class="font-bold mb-2">Por assunto</h3>${byT}</div>
+      <div class="mt-4 p-5 rounded-2xl bg-white border border-slate-200 shadow-sm"><h3 class="font-bold mb-2">Por assunto</h3>${byT || '<p class="text-sm text-slate-500">Nenhuma questão respondida.</p>'}</div>
       ${missed.length ? `<div class="mt-4 p-5 rounded-2xl bg-white border border-slate-200 shadow-sm"><h3 class="font-bold mb-1">Para revisar</h3><p class="text-xs text-slate-500 mb-3">Estes itens já entraram na fila de revisão espaçada.</p><div class="space-y-2">${list}</div></div>` : ''}`;
     show('result');
     if ($('btn-redo')) $('btn-redo').onclick = () => startSession({ ids: missed });
+    if ($('btn-redo-skip')) $('btn-redo-skip').onclick = () => startSession({ ids: skippedIds });
+    $('btn-share').onclick = () => copyText(shareTxt, 'Resultado copiado! Cole no grupo.');
     $('btn-new').onclick = () => startSession();
     $('btn-res-home').onclick = () => { renderHome(); show('home'); };
     session = null;
@@ -562,17 +753,37 @@ const INST_ATLAS = [{"nome": "Cabo de bisturi", "tempo": "dierese", "funcao": "S
     $('atlas-box').querySelectorAll('.tile').forEach(t => { t.onclick = () => t.classList.toggle('revealed'); });
   }
 
-  // ---------- events ----------
+  // ---------- eventos ----------
+  function leaveQuiz(msg) {
+    if (!session) return;
+    stopTimer();
+    const c = curCard();
+    if ($('q-typed') && c && !(c.id in session.results)) session.typed[c.id] = $('q-typed').value;
+    save(LS.session, session); session = null;
+    renderHome(); show('home');
+    if (msg) toast(msg);
+  }
   document.addEventListener('click', e => {
     const z = e.target.closest('[data-zoom]');
-    if (z) { $('lightbox-img').src = z.getAttribute('src'); $('lightbox').classList.add('open'); }
+    if (z) { $('lightbox-img').src = z.getAttribute('src'); $('lightbox').classList.add('open'); return; }
+    const m = e.target.closest('.map-btn');
+    if (m && session) goTo(parseInt(m.dataset.i, 10));
   });
   $('lightbox').onclick = () => $('lightbox').classList.remove('open');
-  $('btn-start').onclick = () => startSession();
+  $('btn-start').onclick = () => {
+    const old = load(LS.session, null);
+    if (old && old.ids && old.ids.length && !old.done && Object.keys(old.results || {}).length && !confirm('Há um simulado em andamento. Começar um novo vai descartá-lo. Continuar?')) return;
+    startSession();
+  };
   $('btn-weak').onclick = () => {
     const srs = srsLoad(); const ids = Object.keys(srs.items).filter(id => BY_ID[id]);
     if (!ids.length) { toast('A fila de pontos fracos está vazia. 🎉'); return; }
     startSession({ ids, weak: true });
+  };
+  $('btn-invite').onclick = () => {
+    readPrefs();
+    if (!prefs.code) { toast('Digite um código de sessão primeiro (ex.: turma-b-mesa).'); $('inp-code').focus(); return; }
+    copyText(inviteUrl(), 'Link de convite copiado! Mande para os colegas.');
   };
   $('btn-atlas').onclick = () => { renderAtlas(); show('atlas'); };
   $('btn-atlas-back').onclick = () => { renderHome(); show('home'); };
@@ -582,24 +793,39 @@ const INST_ATLAS = [{"nome": "Cabo de bisturi", "tempo": "dierese", "funcao": "S
     tiles.forEach(t => t.classList.toggle('revealed', !allOpen));
     $('btn-atlas-toggle').textContent = allOpen ? '👁️ Mostrar todos os nomes' : '🙈 Esconder os nomes';
   };
-  $('btn-home-logo').onclick = () => { if (session) { stopTimer(); save(LS.session, session); session = null; } renderHome(); show('home'); };
-  $('btn-quit').onclick = () => { stopTimer(); save(LS.session, session); session = null; renderHome(); show('home'); toast('Simulado salvo. Continue quando quiser.'); };
-  $('btn-resume').onclick = () => { session = load(LS.session, null); if (!session) return; show('quiz'); renderCard(); };
-  $('btn-discard').onclick = () => { save(LS.session, null); renderHome(); };
+  $('btn-home-logo').onclick = () => { if (session) leaveQuiz(); else { renderHome(); show('home'); } };
+  $('btn-quit').onclick = () => leaveQuiz('Simulado salvo. Continue quando quiser.');
+  $('btn-prev').onclick = () => { if (session && session.idx > 0) goTo(session.idx - 1); };
+  $('btn-skip').onclick = () => {
+    if (!session) return;
+    if (session.idx < session.ids.length - 1) goTo(session.idx + 1);
+    else {
+      const first = session.ids.findIndex(id => !(id in session.results));
+      if (first >= 0 && first !== session.idx) { toast('Voltando para as questões que ficaram sem resposta.'); goTo(first); }
+      else if (first < 0) finishSession();
+      else toast('Esta é a última questão sem resposta. Responda ou toque em 🏁 Finalizar.');
+    }
+  };
+  $('btn-finish').onclick = () => { if (session) requestFinish(); };
+  $('btn-resume').onclick = () => { session = load(LS.session, null); if (!session) return; session.typed = session.typed || {}; session.answers = session.answers || {}; $('q-map-wrap').open = session.ids.length <= 50; show('quiz'); renderCard(); };
+  $('btn-discard').onclick = () => { if (confirm('Descartar o simulado em andamento?')) { save(LS.session, null); renderHome(); } };
   $('btn-how').onclick = () => { $('modal-how').classList.remove('hidden'); $('modal-how').style.display = 'flex'; };
   $('btn-how-close').onclick = () => { $('modal-how').classList.add('hidden'); $('modal-how').style.display = ''; };
   $('modal-how').onclick = e => { if (e.target === $('modal-how')) $('btn-how-close').onclick(); };
   document.addEventListener('change', e => { if (e.target.matches('.topic-chk, .inst-sub-chk, #sel-count, #sel-timer, #chk-type')) readPrefs(); });
+  $('inp-code').addEventListener('input', readPrefs);
 
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') { $('lightbox').classList.remove('open'); $('btn-how-close').onclick(); return; }
     if (!$('screen-quiz').classList.contains('active') || !session) return;
     if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT' || e.target.tagName === 'INPUT') return;
-    const c = BY_ID[session.ids[session.idx]];
+    const c = curCard();
+    if (e.key === 'ArrowLeft') { e.preventDefault(); $('btn-prev').click(); return; }
+    if (e.key === 'ArrowRight') { e.preventDefault(); $('btn-skip').click(); return; }
     if (c.type === 'open') {
       if ((e.key === ' ' || e.key === 'Enter') && !revealed) { e.preventDefault(); revealOpen(); }
       else if (revealed && ['1', '2', '3'].includes(e.key)) grade(parseInt(e.key, 10) - 1);
-    } else if (revealed && (e.key === 'Enter' || e.key === 'ArrowRight') && $('btn-next')) { e.preventDefault(); $('btn-next').click(); }
+    } else if (revealed && e.key === 'Enter' && $('btn-next')) { e.preventDefault(); $('btn-next').click(); }
   });
 
   $('btn-export').onclick = () => {
@@ -615,6 +841,7 @@ const INST_ATLAS = [{"nome": "Cabo de bisturi", "tempo": "dierese", "funcao": "S
     r.readAsText(f); e.target.value = '';
   };
 
+  applyQueryParams();
   renderHome();
 })();
 </script>

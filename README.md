@@ -18,6 +18,8 @@ Simulado de respostas abertas (estilo flashcard) para a prova teórico-prática 
 - **Cronômetro por estação:** é opcional e simula o tempo da prova prática.
 - **Revisão espaçada (tipo Anki):** o que você erra ou marca como "quase" volta depois de 1, 2, 4 e 8 simulados.
 - **Treino de pontos fracos:** um simulado só com os itens da fila de revisão.
+- **Navegação livre:** botões Anterior/Pular e um mapa de questões para ir direto a qualquer uma. Dá para voltar e mudar a avaliação, e o botão Finalizar funciona a qualquer momento (as questões puladas não contam na nota).
+- **Código de sessão / link de convite:** quem usa o mesmo código recebe as mesmas questões, na mesma ordem e com as mesmas letras nas questões de ordem. O botão "Copiar resultado" gera um texto para comparar a nota no grupo.
 - **Atlas de instrumentos:** modo de estudo em que você toca na foto para revelar o nome, o tempo e a função.
 
 ## Fontes
