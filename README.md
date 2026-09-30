@@ -19,6 +19,8 @@ Simulado de respostas abertas (estilo flashcard) para a prova teórico-prática 
 - **Treino de pontos fracos:** um simulado só com os itens da fila de revisão.
 - **Navegação livre:** botões Anterior/Pular e um mapa de questões para ir direto a qualquer uma. Dá para voltar e mudar a avaliação, e o botão Finalizar funciona a qualquer momento (as questões puladas não contam na nota).
 - **Código de sessão / link de convite:** quem usa o mesmo código recebe as mesmas questões, na mesma ordem e com as mesmas letras nas questões de ordem. O botão "Copiar resultado" gera um texto para comparar a nota no grupo.
+- **Sorteio de suturas (prova prática):** sorteia 1 sutura descontínua (simples, em U, Donatti, em X ou intradérmica) e 1 contínua (chuleio simples, chuleio ancorado, barra grega ou intradérmica). O cronômetro de 5:00 avisa com som, voz, vibração e tela colorida aos 2:30, quando falta 1 minuto e no fim. O endereço direto é `…/#sutura`.
+- **Atlas de fios, agulhas e nós:** embalagens dos fios com a classificação, fios sem foto, tabela-resumo, fio por tecido (guia do professor), calibres, tipos de agulha e nós manuais.
 - **Atlas de instrumentos:** modo de estudo em que você toca na foto para revelar o nome, o tempo e a função.
 
 ## Fontes
