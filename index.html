@@ -256,6 +256,7 @@
         <span id="fs-kind" class="text-xs font-semibold uppercase tracking-wide text-violet-700"></span>
         <span id="fs-score" class="text-xs text-slate-500"></span>
       </div>
+      <div id="fs-progress" class="text-xs text-violet-600 mt-1"></div>
       <div id="fs-img" class="hidden mt-3"></div>
       <div id="fs-prompt" class="text-2xl sm:text-3xl font-extrabold mt-2 leading-tight">Toque em Sortear</div>
       <div id="fs-ask" class="text-sm text-slate-500 mt-1"></div>
@@ -267,7 +268,7 @@
         <button id="btn-fs-wrong" class="btn bg-rose-600 text-white hover:bg-rose-700">❌ Errei</button>
         <button id="btn-fs-right" class="btn bg-green-600 text-white hover:bg-green-700">✅ Acertei</button>
       </div>
-      <button id="btn-fs-draw" class="btn w-full mt-2 border border-slate-300 bg-white hover:bg-slate-100">🎲 Sortear outro</button>
+      <button id="btn-fs-draw" class="btn w-full mt-2 border border-slate-300 bg-white hover:bg-slate-100">⏭️ Pular para o próximo</button>
     </div>
 
     <details class="mt-4 p-4 rounded-2xl bg-white border border-slate-200" open>
@@ -278,7 +279,11 @@
         <label class="flex items-center gap-2"><input type="checkbox" class="w-4 h-4 fs-mode" value="foto" checked> <span><b>Embalagem (foto) → nome e características</b></span></label>
         <label class="flex items-center gap-2"><input type="checkbox" class="w-4 h-4 fs-mode" value="tecido"> <span><b>Tecido → fio e calibre</b> (ex.: “vaso” → polipropileno 5-0 a 7-0)</span></label>
       </div>
-      <button id="btn-fs-zero" class="mt-3 text-xs px-3 py-1.5 rounded-lg border border-slate-300">↺ Zerar placar</button>
+      <div class="mt-3 flex flex-wrap gap-2">
+        <button id="btn-fs-zero" class="text-xs px-3 py-1.5 rounded-lg border border-slate-300">↺ Zerar placar</button>
+        <button id="btn-fs-reshuffle" class="text-xs px-3 py-1.5 rounded-lg border border-slate-300">🔀 Recomeçar rodada</button>
+      </div>
+      <p class="text-xs text-slate-500 mt-2">Os itens saem como cartas de um baralho embaralhado: nenhum se repete até passar por todos. Depois começa uma nova rodada, em outra ordem.</p>
     </details>
   </section>
 </main>
@@ -1125,7 +1130,7 @@ const FIOS_ATLAS = {"fios": [{"nome": "Categute simples", "origem": "orgânico (
   function fioCarTxt(c) { return `${c.a} · ${c.o} · ${c.e}`; }
   const LS_FS = 'simpc_fiosort';
   let fsState = Object.assign({ modes: ['nome', 'carac', 'foto'], ok: 0, bad: 0 }, load(LS_FS, {}));
-  let fsCur = null, fsLast = '';
+  let fsCur = null, fsLast = '', fsDeck = [], fsPos = 0, fsRound = 1;
   function fsItems() {
     const F = FIOS_ATLAS.fios, out = [];
     if (fsState.modes.includes('nome')) F.forEach(f => out.push({ mode: 'nome', key: 'n|' + f.nome, f }));
@@ -1139,14 +1144,31 @@ const FIOS_ATLAS = {"fios": [{"nome": "Categute simples", "origem": "orgânico (
     return out;
   }
   function fsScore() { const n = fsState.ok + fsState.bad; $('fs-score').textContent = n ? `Placar: ✅ ${fsState.ok} · ❌ ${fsState.bad} (${Math.round(100 * fsState.ok / n)}%)` : 'Placar: —'; }
+  function fsDeckKey() { return fsState.modes.slice().sort().join(','); }
+  function fsNewDeck(keepRound) {
+    const items = fsItems();
+    fsDeck = shuffle(items.map(x => x.key));
+    if (fsDeck.length > 1 && fsDeck[0] === fsLast) fsDeck.push(fsDeck.shift());
+    fsPos = 0; if (!keepRound) fsRound = 1;
+    fsState.deck = { key: fsDeckKey(), order: fsDeck, pos: 0, round: fsRound }; save(LS_FS, fsState);
+  }
+  function fsProgress() {
+    $('fs-progress').textContent = fsDeck.length ? `Rodada ${fsRound} · ${Math.min(fsPos, fsDeck.length)} de ${fsDeck.length}` : '';
+  }
   function fsDraw() {
-    let pool = fsItems();
-    if (!pool.length) { toast('Marque pelo menos um tipo de sorteio em ⚙️.'); return; }
-    const modes = [...new Set(pool.map(x => x.mode))];
-    const m = modes[Math.floor(Math.random() * modes.length)];
-    pool = pool.filter(x => x.mode === m);
-    if (pool.length > 1) pool = pool.filter(x => x.key !== fsLast);
-    fsCur = pool[Math.floor(Math.random() * pool.length)]; fsLast = fsCur.key;
+    const all = fsItems();
+    if (!all.length) { toast('Marque pelo menos um tipo de sorteio em ⚙️.'); return; }
+    const byKey = {}; all.forEach(x => { byKey[x.key] = x; });
+    if (!fsDeck.length || fsState.deck && fsState.deck.key !== fsDeckKey()) fsNewDeck();
+    if (fsPos >= fsDeck.length) {
+      fsRound += 1; fsNewDeck(true);
+      toast(`🎉 Você passou por todos os ${fsDeck.length} itens! Começando a rodada ${fsRound}.`);
+    }
+    fsCur = byKey[fsDeck[fsPos]];
+    if (!fsCur) { fsNewDeck(); fsCur = byKey[fsDeck[0]]; }
+    fsPos += 1; fsLast = fsCur.key;
+    fsState.deck = { key: fsDeckKey(), order: fsDeck, pos: fsPos, round: fsRound }; save(LS_FS, fsState);
+    fsProgress();
     const K = { nome: 'Nome → características', carac: 'Características → nome', foto: 'Embalagem → nome e características', tecido: 'Tecido → fio e calibre' };
     $('fs-kind').textContent = K[fsCur.mode];
     $('fs-img').classList.add('hidden'); $('fs-img').innerHTML = '';
@@ -1171,6 +1193,12 @@ const FIOS_ATLAS = {"fios": [{"nome": "Categute simples", "origem": "orgânico (
   function fsGrade(ok) { if (ok) fsState.ok++; else fsState.bad++; save(LS_FS, fsState); fsScore(); fsDraw(); }
   function openFioSort() {
     document.querySelectorAll('.fs-mode').forEach(c => { c.checked = fsState.modes.includes(c.value); });
+    if (!fsDeck.length && fsState.deck && fsState.deck.key === fsDeckKey()) {
+      const valid = new Set(fsItems().map(x => x.key));
+      if (fsState.deck.order.every(k => valid.has(k)) && fsState.deck.order.length === valid.size) {
+        fsDeck = fsState.deck.order; fsPos = Math.max(0, fsState.deck.pos - 1); fsRound = fsState.deck.round || 1;
+      }
+    }
     fsScore(); show('fiosort'); if (!fsCur) fsDraw();
   }
   $('btn-fiosort').onclick = openFioSort;
@@ -1180,10 +1208,11 @@ const FIOS_ATLAS = {"fios": [{"nome": "Categute simples", "origem": "orgânico (
   $('btn-fs-wrong').onclick = () => fsGrade(false);
   $('btn-fs-draw').onclick = fsDraw;
   $('btn-fs-zero').onclick = () => { fsState.ok = 0; fsState.bad = 0; save(LS_FS, fsState); fsScore(); };
+  $('btn-fs-reshuffle').onclick = () => { fsNewDeck(); fsDraw(); toast('Baralho embaralhado de novo.'); };
   document.addEventListener('change', e => {
     if (!e.target.matches('.fs-mode')) return;
     fsState.modes = [...document.querySelectorAll('.fs-mode:checked')].map(c => c.value); save(LS_FS, fsState);
-    if (fsCur && !fsState.modes.includes(fsCur.mode)) fsDraw();
+    fsNewDeck(); fsDraw();
   });
 
   // ---------- eventos ----------
