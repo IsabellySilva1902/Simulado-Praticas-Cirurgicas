@@ -385,6 +385,7 @@
         <label class="flex items-center gap-2"><input type="checkbox" class="w-4 h-4 fs-mode" value="foto" checked> <span><b>Embalagem (foto) → nome e características</b></span></label>
         <label class="flex items-center gap-2"><input type="checkbox" class="w-4 h-4 fs-mode" value="tecido"> <span><b>Tecido → fio e calibre</b> (ex.: “vaso” → polipropileno 5-0 a 7-0)</span></label>
       </div>
+      <label class="mt-3 flex items-center gap-2 text-sm p-2 rounded-lg bg-violet-50 border border-violet-200"><input id="fs-only-photo" type="checkbox" class="w-4 h-4"> <span><b>📷 Só fios com foto da embalagem</b> (Vicryl, Monocryl, PDS, Prolene, Ethilon, categute simples e cromado)</span></label>
       <div class="mt-3 flex flex-wrap gap-2">
         <button id="btn-fs-zero" class="text-xs px-3 py-1.5 rounded-lg border border-slate-300">↺ Zerar placar</button>
         <button id="btn-fs-reshuffle" class="text-xs px-3 py-1.5 rounded-lg border border-slate-300">🔀 Recomeçar rodada</button>
@@ -1395,19 +1396,19 @@ const CONC_DATA = {"items": [{"c": "Esterilização", "t": "Instrumental cirúrg
   let fsState = Object.assign({ modes: ['nome', 'carac', 'foto'], ok: 0, bad: 0 }, load(LS_FS, {}));
   let fsCur = null, fsLast = '', fsDeck = [], fsPos = 0, fsRound = 1;
   function fsItems() {
-    const F = FIOS_ATLAS.fios, out = [];
+    const F = FIOS_ATLAS.fios.filter(f => !fsState.onlyPhoto || f.img), out = [];
     if (fsState.modes.includes('nome')) F.forEach(f => out.push({ mode: 'nome', key: 'n|' + f.nome, f }));
     if (fsState.modes.includes('foto')) F.filter(f => f.img).forEach(f => out.push({ mode: 'foto', key: 'f|' + f.nome, f }));
     if (fsState.modes.includes('carac')) {
       const combos = {};
-      F.forEach(f => { const t = fioCarTxt(fioCar(f)); (combos[t] = combos[t] || []).push(f); });
-      Object.entries(combos).forEach(([t, fs]) => out.push({ mode: 'carac', key: 'c|' + t, txt: t, fs }));
+      FIOS_ATLAS.fios.forEach(f => { const t = fioCarTxt(fioCar(f)); (combos[t] = combos[t] || []).push(f); });
+      Object.entries(combos).filter(([t, fs]) => !fsState.onlyPhoto || fs.some(f => f.img)).forEach(([t, fs]) => out.push({ mode: 'carac', key: 'c|' + t, txt: t, fs }));
     }
-    if (fsState.modes.includes('tecido')) FIOS_ATLAS.tecidos.forEach(r => out.push({ mode: 'tecido', key: 't|' + r[0], r }));
+    if (fsState.modes.includes('tecido') && !fsState.onlyPhoto) FIOS_ATLAS.tecidos.forEach(r => out.push({ mode: 'tecido', key: 't|' + r[0], r }));
     return out;
   }
   function fsScore() { const n = fsState.ok + fsState.bad; $('fs-score').textContent = n ? `Placar: ✅ ${fsState.ok} · ❌ ${fsState.bad} (${Math.round(100 * fsState.ok / n)}%)` : 'Placar: —'; }
-  function fsDeckKey() { return fsState.modes.slice().sort().join(','); }
+  function fsDeckKey() { return fsState.modes.slice().sort().join(',') + (fsState.onlyPhoto ? '/foto' : ''); }
   function fsNewDeck(keepRound) {
     const items = fsItems();
     fsDeck = shuffle(items.map(x => x.key));
@@ -1435,7 +1436,7 @@ const CONC_DATA = {"items": [{"c": "Esterilização", "t": "Instrumental cirúrg
     const K = { nome: 'Nome → características', carac: 'Características → nome', foto: 'Embalagem → nome e características', tecido: 'Tecido → fio e calibre' };
     $('fs-kind').textContent = K[fsCur.mode];
     $('fs-img').classList.add('hidden'); $('fs-img').innerHTML = '';
-    if (fsCur.mode === 'nome') { $('fs-prompt').textContent = fsCur.f.nome; $('fs-ask').textContent = 'Diga: absorção (absorvível/inabsorvível), origem (orgânico/sintético/metálico) e estrutura (mono/multifilamentar). Bônus: uso.'; }
+    if (fsCur.mode === 'nome') { if (fsCur.f.img) { $('fs-img').innerHTML = imgTag(fsCur.f.img, 'card-img'); $('fs-img').classList.remove('hidden'); } $('fs-prompt').textContent = fsCur.f.nome; $('fs-ask').textContent = 'Diga: absorção (absorvível/inabsorvível), origem (orgânico/sintético/metálico) e estrutura (mono/multifilamentar). Bônus: uso.'; }
     else if (fsCur.mode === 'foto') { $('fs-img').innerHTML = imgTag(fsCur.f.img, 'card-img'); $('fs-img').classList.remove('hidden'); $('fs-prompt').textContent = 'Que fio é este?'; $('fs-ask').textContent = 'Diga o nome e as características (absorção, origem e estrutura).'; }
     else if (fsCur.mode === 'carac') { $('fs-prompt').textContent = fsCur.txt[0].toUpperCase() + fsCur.txt.slice(1); $('fs-ask').textContent = 'Cite um fio com essas características.'; }
     else { $('fs-prompt').textContent = fsCur.r[0]; $('fs-ask').textContent = 'Qual fio e qual calibre (guia do professor)?'; }
@@ -1445,7 +1446,7 @@ const CONC_DATA = {"items": [{"c": "Esterilização", "t": "Instrumental cirúrg
   function fsReveal() {
     if (!fsCur) return;
     let h = '<div class="text-xs font-semibold text-emerald-700 uppercase tracking-wide">Resposta</div>';
-    const one = f => `<div class="mt-1"><b>${esc(f.nome)}</b></div><div class="mt-1">${fioChips(f)}</div><div class="text-sm text-slate-700">${esc(f.absorcao)}</div><div class="text-sm text-slate-500">${esc(f.extra)}</div>`;
+    const one = f => `${f.img && fsCur.mode === 'carac' ? `<img src="${esc(f.img)}" alt="" data-zoom="1" class="w-full max-h-40 object-contain bg-white rounded-lg mt-1 cursor-zoom-in">` : ''}<div class="mt-1"><b>${esc(f.nome)}</b></div><div class="mt-1">${fioChips(f)}</div><div class="text-sm text-slate-700">${esc(f.absorcao)}</div><div class="text-sm text-slate-500">${esc(f.extra)}</div>`;
     if (fsCur.mode === 'nome' || fsCur.mode === 'foto') h += one(fsCur.f);
     else if (fsCur.mode === 'carac') h += `<div class="text-sm text-slate-600 mt-1">Vale qualquer um destes:</div>` + fsCur.fs.map(f => `<div class="mt-2 pt-2 border-t border-emerald-100">${one(f)}</div>`).join('');
     else h += `<div class="text-lg font-bold mt-1">${esc(fsCur.r[1])}</div><div class="text-sm text-slate-600">Calibre: <b>${esc(fsCur.r[2])}</b></div>`;
@@ -1456,6 +1457,7 @@ const CONC_DATA = {"items": [{"c": "Esterilização", "t": "Instrumental cirúrg
   function fsGrade(ok) { if (ok) fsState.ok++; else fsState.bad++; save(LS_FS, fsState); fsScore(); fsDraw(); }
   function openFioSort() {
     document.querySelectorAll('.fs-mode').forEach(c => { c.checked = fsState.modes.includes(c.value); });
+    $('fs-only-photo').checked = !!fsState.onlyPhoto;
     if (!fsDeck.length && fsState.deck && fsState.deck.key === fsDeckKey()) {
       const valid = new Set(fsItems().map(x => x.key));
       if (fsState.deck.order.every(k => valid.has(k)) && fsState.deck.order.length === valid.size) {
@@ -1473,8 +1475,8 @@ const CONC_DATA = {"items": [{"c": "Esterilização", "t": "Instrumental cirúrg
   $('btn-fs-zero').onclick = () => { fsState.ok = 0; fsState.bad = 0; save(LS_FS, fsState); fsScore(); };
   $('btn-fs-reshuffle').onclick = () => { fsNewDeck(); fsDraw(); toast('Baralho embaralhado de novo.'); };
   document.addEventListener('change', e => {
-    if (!e.target.matches('.fs-mode')) return;
-    fsState.modes = [...document.querySelectorAll('.fs-mode:checked')].map(c => c.value); save(LS_FS, fsState);
+    if (!e.target.matches('.fs-mode, #fs-only-photo')) return;
+    fsState.modes = [...document.querySelectorAll('.fs-mode:checked')].map(c => c.value); fsState.onlyPhoto = $('fs-only-photo').checked; save(LS_FS, fsState);
     fsNewDeck(); fsDraw();
   });
 
