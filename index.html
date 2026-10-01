@@ -250,7 +250,7 @@
       <h2 class="font-bold text-lg">🔧 Sorteio de instrumentos</h2>
       <button id="btn-is-back" class="text-sm px-3 py-1.5 rounded-lg border border-slate-300 bg-white">← Início</button>
     </div>
-    <p class="text-sm text-slate-500 mb-3">Sorteia a foto de um instrumento: diga o <b>nome</b> (reto ou curvo, se houver) e o <b>tempo cirúrgico</b> em voz alta e toque em <b>Mostrar resposta</b>.</p>
+    <p class="text-sm text-slate-500 mb-3">Sorteia a foto de um instrumento: diga o <b>nome</b> (reto ou curvo, se houver) em voz alta e toque em <b>Mostrar resposta</b>.</p>
 
     <div class="p-5 rounded-2xl bg-white border-2 border-amber-500 shadow-sm">
       <div class="flex items-center justify-between gap-2">
@@ -364,7 +364,7 @@
     <h3 class="font-semibold mt-3">🪡 Sorteio de suturas</h3>
     <p>Na tela inicial, <b>Sorteio de suturas</b> sorteia 1 sutura descontínua (simples, em U, Donatti, em X ou intradérmica) e 1 contínua (chuleio simples, chuleio ancorado, barra grega ou intradérmica) e cronometra <b>5:00</b>. Há aviso com som, voz e vibração aos <b>2:30</b>, quando falta <b>1 minuto</b> e quando o <b>tempo acaba</b>. Em ⚙️ Opções dá para tirar suturas do sorteio e desligar os avisos.</p>
     <h3 class="font-semibold mt-3">🔧 Sorteio de instrumentos</h3>
-    <p>Sorteia a foto de um instrumento para você dizer o nome (com reta/curva) e o tempo cirúrgico. Em ⚙️ dá para escolher quais tempos cirúrgicos entram. Nada se repete até passar por todas as fotos.</p>
+    <p>Sorteia a foto de um instrumento para você dizer o nome (com reta/curva). Em ⚙️ dá para escolher quais tempos cirúrgicos entram. Nada se repete até passar por todas as fotos.</p>
     <h3 class="font-semibold mt-3">🧵 Sorteio de fios</h3>
     <p>Sorteia um fio para você dizer as características (absorção, origem e estrutura), ou um conjunto de características para você dizer um fio que se encaixa. Também pode sortear a foto de uma embalagem ou um tecido (para dizer o fio e o calibre). Você marca se acertou e o placar vai somando.</p>
     <h3 class="font-semibold mt-3">🔁 Revisão espaçada (como no Anki)</h3>
@@ -1213,12 +1213,12 @@ const FIOS_ATLAS = {"fios": [{"nome": "Categute simples", "origem": "orgânico (
     if (!isCur) { isNewDeck(); isCur = byKey[isDeck[0]]; }
     isPos += 1; isLast = isCur.key; isSaveDeck();
     $('is-progress').textContent = `Rodada ${isRound} · ${isPos} de ${isDeck.length}`;
-    const K = { foto: 'Foto → nome e tempo', nome: 'Nome → tempo e função', funcao: 'Função → instrumento', grupo: 'Grupo → cite os instrumentos' };
+    const K = { foto: 'Foto → nome', nome: 'Nome → tempo e função', funcao: 'Função → instrumento', grupo: 'Grupo → cite os instrumentos' };
     $('is-kind').textContent = K[isCur.mode];
     $('is-img').classList.add('hidden'); $('is-img').innerHTML = '';
     if (isCur.mode === 'foto') {
       $('is-img').innerHTML = imgTag(isCur.x.img, 'card-img'); $('is-img').classList.remove('hidden');
-      $('is-prompt').textContent = 'Que instrumento é este?'; $('is-ask').textContent = 'Diga o nome (reto ou curvo, se houver) e o tempo cirúrgico.';
+      $('is-prompt').textContent = 'Que instrumento é este?'; $('is-ask').textContent = 'Diga o nome do instrumento (reto ou curvo, se houver).';
     } else if (isCur.mode === 'nome') {
       $('is-prompt').textContent = isCur.x.nome; $('is-ask').textContent = 'Diga o tempo cirúrgico e a função. Bônus: como reconhecer.';
     } else if (isCur.mode === 'funcao') {
@@ -1238,9 +1238,7 @@ const FIOS_ATLAS = {"fios": [{"nome": "Categute simples", "origem": "orgânico (
       <div class="text-sm text-slate-500 mt-1"><b>Como reconhecer:</b> ${esc(x.dica || '')}</div>`;
     let h = '<div class="text-xs font-semibold text-emerald-700 uppercase tracking-wide">Resposta</div>';
     if (isCur.mode === 'foto') h += `<div class="text-xl font-extrabold mt-1">${esc(isCur.x.nome)}</div>
-      <div class="text-base font-bold text-amber-800 mt-1">${esc(TEMPO_LBL[isTempoOf(isCur.x)])}</div>
-      <div class="text-sm text-slate-600 mt-2"><b>Função:</b> ${esc(isCur.x.funcao)}</div>
-      <div class="text-sm text-slate-500 mt-1"><b>Como reconhecer:</b> ${esc(isCur.x.dica || '')}</div>`;
+      <div class="text-sm text-slate-500 mt-2"><b>Como reconhecer:</b> ${esc(isCur.x.dica || '')}</div>`;
     else if (isCur.mode === 'nome') h += one(isCur.x, true);
     else if (isCur.mode === 'funcao') h += (isCur.xs.length > 1 ? '<div class="text-sm text-slate-600">Vale qualquer um destes:</div>' : '') + isCur.xs.map((x, i) => `<div class="${i ? 'mt-3 pt-3 border-t border-emerald-100' : 'mt-1'}">${one(x, true)}</div>`).join('');
     else h += `<div class="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-2">` + isCur.xs.map(x => `<div class="p-1.5 rounded-lg bg-white border border-emerald-100"><img src="${esc(x.img)}" alt="" data-zoom="1" class="w-full h-20 object-contain cursor-zoom-in"><div class="text-xs font-semibold mt-1">${esc(x.nome)}</div></div>`).join('') + `</div>`;
